@@ -1,39 +1,47 @@
 package com.insy2s.exercices.controller;
 
+import com.insy2s.exercices.domain.Product;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
-    private static final Map<Integer, String> products = new HashMap<>();
-    static {
-        products.put(0, "PC");
-        products.put(1, "PS5");
-        products.put(2, "TV");
-        products.put(3, "Feuille A4");
-        products.put(4, "Bouteille d'eau");
+    private static final ArrayList<Product> products = new ArrayList<>();
+
+    @PostMapping
+    public ResponseEntity<String> post(@RequestBody Product product) {
+        if (products.add(product)) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Produit ajouté avec l'id " + product.getId());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    @GetMapping("/product/{id}")
-    public String getById(@PathVariable int id) {
-        return products.getOrDefault(id, "Produit n'existe pas");
+    @PutMapping("/{id}")
+    public ResponseEntity<HttpStatus> put(@PathVariable int id, @RequestBody Product product) {
+        for (Product p : products) {
+            if (p.getId() == id) {
+                if (product.getName() != null) {
+                    p.setName(p.getName());
+                }
+                if (product.getPrice() != null) {
+                    p.setPrice(product.getPrice());
+                }
+                return ResponseEntity.status(HttpStatus.OK).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    @GetMapping("/product/add")
-    public String add(@RequestParam String name){
-        return products.put(products.size(), name);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable int id) {
+        return (products.removeIf(product -> product.getId() == id)) ?
+                ResponseEntity.status(HttpStatus.OK).build() :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    @GetMapping("product/all")
-    public ResponseEntity<Map<Integer,String>> getAll(){
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(products);
-    }
-
 }
