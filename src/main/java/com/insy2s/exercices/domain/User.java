@@ -1,53 +1,38 @@
 package com.insy2s.exercices.domain;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
+@Entity
+@Table(name = "users")
 public class User {
-    private static final AtomicInteger atomicInteger = new AtomicInteger(-1);
-    private int id;
-    private String name;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+
+    @Column(nullable = false)
+    private String firstName;
+
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
     private String email;
 
-    public User(String name, String email) {
-        this.id = atomicInteger.incrementAndGet();
-        this.name = name;
-        this.email = email;
-    }
+    @ManyToOne
+    private Address address;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(email, user.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(email);
-    }
+    @ManyToMany
+    private List<Role> roles = new ArrayList<>();
 }
